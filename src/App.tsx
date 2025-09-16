@@ -258,9 +258,12 @@ function App() {
         >
           {/* Header */}
           <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
-              Who's That POKéMON?
-            </h1>
+            <div className="flex">
+              <img src="/logo.svg" alt="Poké Ball Logo" className="h-12 w-12 mr-2" />
+              <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
+                Who's That POKéMON?
+              </h1>
+            </div>
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="bg-gray-600 hover:bg-gray-700 focus:bg-gray-700 text-white font-semibold px-4 py-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
@@ -495,9 +498,12 @@ function App() {
         aria-label="Who's That POKéMON game"
       >
         <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
-            Who's That POKéMON?
-          </h1>
+            <div className="flex">
+              <img src="/logo.svg" alt="Poké Ball Logo" className="h-12 w-12 mr-2" />
+              <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
+                Who's That POKéMON?
+              </h1>
+            </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="bg-gray-600 hover:bg-gray-700 focus:bg-gray-700 text-white font-semibold px-4 py-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
