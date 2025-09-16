@@ -1,55 +1,22 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-import FontAwesome from "@fortawesome/fontawesome-svg-core";
 import _ from "lodash";
-import Pokedex from "pokeapi-js-wrapper";
+import { Pokedex, type Pokemon, type PokemonSpecies } from "pokeapi-js-wrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSun,
+  faMoon,
+  faChevronUp,
+  faChevronDown,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
-// Add custom slider styles
-const sliderStyles = `
-  .slider {
-    -webkit-appearance: none;
-    appearance: none;
-    background: #d1d5db;
-    outline: none;
-    border-radius: 15px;
-  }
-  
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ef4444;
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  
-  .slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ef4444;
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  
-  .dark-mode .slider::-webkit-slider-thumb {
-    background: #eab308;
-  }
-  
-  .dark-mode .slider::-moz-range-thumb {
-    background: #eab308;
-  }
-`;
-
-// Inject styles
-if (typeof document !== "undefined") {
-  const styleElement = document.createElement("style");
-  styleElement.textContent = sliderStyles;
-  document.head.appendChild(styleElement);
+interface PokeData {
+  id: number;
+  name: string;
+  flavor: string;
+  sprite?: string;
+  revealed: boolean;
 }
 
 const numeralLookup = [
@@ -62,64 +29,8 @@ const numeralLookup = [
   "VII",
   "VIII",
   "IX",
-  "X"
+  "X",
 ];
-
-/**
- * Get a FontAwesome icon with optional transformations.
- *
- * @param {string} iconName - The name of the FontAwesome icon.
- * @param {number} [size] - The size of the icon, relative to the default size.
- * @param {number} [rotate] - The rotation angle of the icon.
- * @param {boolean} [flipX] - Whether to flip the icon horizontally.
- * @param {boolean} [flipY] - Whether to flip the icon vertically.
- * @param {boolean} [spin] - Whether to apply a spinning animation to the icon.
- * @returns {object} The FontAwesome icon object.
- */
-const getFontAwesomeIcon = (
-  iconName: FontAwesome.IconName,
-  {
-    size = undefined,
-    rotate = undefined,
-    flipX = undefined,
-    flipY = undefined,
-    spin = undefined
-  }: { size?: number; rotate?: number; flipX?: boolean; flipY?: boolean; spin?: boolean } = {}
-) => {
-  const icon = FontAwesome.findIconDefinition({ prefix: "fas", iconName: iconName });
-  const sizeStyles: FontAwesome.Styles = size ? { width: `${size}em`, height: `${size}em` } : {};
-  const iconParams: FontAwesome.IconParams = {
-    transform: {
-      size: size ? size * 16 : undefined,
-      x: size ? size : undefined,
-      y: size ? size : undefined,
-      rotate,
-      flipX,
-      flipY
-    },
-    styles: { ...sizeStyles },
-    classes: [spin ? "animate-spin" : null].filter(_.isString)
-  };
-
-  if (_.isEmpty(iconParams.classes)) {
-    delete iconParams.classes;
-  }
-
-  return FontAwesome.icon(icon, iconParams);
-};
-
-// Generate base64 encoded SVG icons from FontAwesome
-const chevronUpIcon = getFontAwesomeIcon("chevron-up");
-const chevronDownIcon = getFontAwesomeIcon("chevron-down");
-const spinnerIcon = getFontAwesomeIcon("spinner", { size: 4, spin: true });
-const sunIcon = getFontAwesomeIcon("sun");
-const moonIcon = getFontAwesomeIcon("moon");
-
-const chevronUpHtml = chevronUpIcon.html.join("");
-const chevronDownHtml = chevronDownIcon.html.join("");
-const spinnerHtml = spinnerIcon.html.join("");
-const sunHtml = sunIcon.html.join("");
-const moonHtml = moonIcon.html.join("");
 
 const gameGenerations = [
   { shortGame: "R & B", game: "Red and Blue", maxDex: 151 }, // 001-151
@@ -130,16 +41,15 @@ const gameGenerations = [
   { shortGame: "X & Y", game: "X and Y", maxDex: 721 }, // 650-721
   { shortGame: "S & M", game: "Sun and Moon", maxDex: 809 }, // 722-809
   { shortGame: "S & S", game: "Sword and Shield", maxDex: 905 }, // 810-905
-  { shortGame: "S & V", game: "Scarlet and Violet", maxDex: 1025 } // 906-1025
+  { shortGame: "S & V", game: "Scarlet and Violet", maxDex: 1025 }, // 906-1025
 ];
 
 function App() {
   const DEFAULT_ROUNDS = 6;
   const DEFAULT_POKES_PER_ROUND = 3;
-  const P = useMemo(() => new Pokedex.Pokedex(), []);
+  const P = useMemo(() => new Pokedex(), []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<PokeData[]>([]);
   const [pkmnLoading, setPkmnLoading] = useState(true);
   const [gameLoading, setGameLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
@@ -156,7 +66,7 @@ function App() {
   const [settings, setSettings] = useState({
     rounds: DEFAULT_ROUNDS,
     pokemonPerRound: DEFAULT_POKES_PER_ROUND,
-    includedGenerations: _.range(0, 8), // All generations by default
+    includedGenerations: [0, 1, 2, 3, 4, 5, 6, 7, 8], // All generations by default
   });
   const [allPokemon, setAllPokemon] = useState(new Set());
 
@@ -172,7 +82,7 @@ function App() {
           ...curr,
           startId,
           endId,
-          availableIds: _.range(startId, endId + 1)
+          availableIds: _.range(startId, endId + 1),
         };
       }),
     [settings]
@@ -180,8 +90,8 @@ function App() {
 
   // Listen for system theme changes
   useEffect(() => {
-    if (window?.matchMedia) {
-      const mediaQuery = window?.matchMedia?.("(prefers-color-scheme: dark)");
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
 
       // Use addEventListener if available, otherwise use addListener for older browsers
@@ -226,20 +136,20 @@ function App() {
       // ids[0] = 80;
       // ids[1] = 332;
 
-      const pokemonData = await Promise.all(
+      const pokemonData: (Pokemon & PokemonSpecies)[] = await Promise.all(
         ids.map(async (id) => {
           const [species, pokemon] = await Promise.all([
             P.getPokemonSpeciesByName(id),
-            P.getPokemonByName(id)
+            P.getPokemonByName(id),
           ]);
           return { ...species, ...pokemon };
         })
       );
 
-      const cleaned = pokemonData.map((s) => {
+      const cleaned = pokemonData.map<PokeData>((s) => {
         // split flavor text into words and replace banned words
         const flavorTextEntry = _.find(s.flavor_text_entries, {
-          language: { name: "en" }
+          language: { name: "en" },
         });
 
         const flavor = _.split(
@@ -260,7 +170,8 @@ function App() {
           id: s.id,
           name: s.name,
           flavor: flavor,
-          sprite: s.sprites.front_default
+          sprite: s.sprites.front_default ?? undefined,
+          revealed: false,
         };
       });
       setData(cleaned);
@@ -290,7 +201,10 @@ function App() {
     } else {
       newGens.push(index);
     }
-    setSettings((prev) => ({ ...prev, includedGenerations: newGens.sort() }));
+    setSettings((prev) => ({
+      ...prev,
+      includedGenerations: _(newGens).sort().value(),
+    }));
   };
 
   if (gameLoading) {
@@ -329,13 +243,13 @@ function App() {
               aria-label={darkMode ? "Toggle Light Mode" : "Toggle Dark Mode"}
               title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              <div
-                className="w-5 h-5"
-                dangerouslySetInnerHTML={{
-                  __html: darkMode ? sunHtml : moonHtml
-                }}
-                aria-hidden="true"
-              />
+              <div className="w-5 h-5" aria-hidden="true">
+                {darkMode ? (
+                  <FontAwesomeIcon icon={faSun} />
+                ) : (
+                  <FontAwesomeIcon icon={faMoon} />
+                )}
+              </div>
               <span className="sr-only">
                 {darkMode ? "Toggle Light Mode" : "Toggle Dark Mode"}
               </span>
@@ -365,13 +279,11 @@ function App() {
                 } to ${expandedSettings ? "hide" : "show"}`}
               >
                 <span>Game Settings</span>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: expandedSettings ? chevronUpHtml : chevronDownHtml
-                  }}
-                  aria-hidden="true"
-                  className="w-6 h-6"
-                />
+                <div aria-hidden="true" className="w-6 h-6">
+                  <FontAwesomeIcon
+                    icon={expandedSettings ? faChevronUp : faChevronDown}
+                  />
+                </div>
               </button>
             </h3>
 
@@ -424,7 +336,7 @@ function App() {
                     onChange={(e) => {
                       setSettings((prev) => ({
                         ...prev,
-                        pokemonPerRound: parseInt(e.target.value)
+                        pokemonPerRound: parseInt(e.target.value),
                       }));
                       setGameLoading(true);
                     }}
@@ -502,15 +414,11 @@ function App() {
                   } to ${expandedRounds[i] ? "hide" : "show"} POKéMON cards`}
                 >
                   <span>Round {i + 1}</span>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: expandedRounds[i]
-                        ? chevronUpHtml
-                        : chevronDownHtml
-                    }}
-                    aria-hidden="true"
-                    className="w-6 h-6"
-                  />
+                  <div aria-hidden="true" className="w-6 h-6">
+                    <FontAwesomeIcon
+                      icon={expandedRounds[i] ? faChevronUp : faChevronDown}
+                    />
+                  </div>
                 </button>
               </h2>
               {expandedRounds[i] && (
@@ -554,14 +462,13 @@ function App() {
                             {/* Skeleton Image with spinner */}
                             <div className="flex justify-center items-center h-24 mb-4">
                               <div
+                                aria-hidden="true"
                                 className={`w-8 h-8 ${
                                   darkMode ? "text-yellow-500" : "text-red-500"
                                 }`}
-                                dangerouslySetInnerHTML={{
-                                  __html: spinnerHtml
-                                }}
-                                aria-hidden="true"
-                              />
+                              >
+                                <FontAwesomeIcon icon={faSpinner} />
+                              </div>
                             </div>
 
                             {/* Skeleton Text */}
@@ -635,13 +542,9 @@ function App() {
             aria-label={darkMode ? "Toggle Light Mode" : "Toggle Dark Mode"}
             title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
-            <div
-              className="w-5 h-5"
-              dangerouslySetInnerHTML={{
-                __html: darkMode ? sunHtml : moonHtml
-              }}
-              aria-hidden="true"
-            />
+            <div aria-hidden="true" className="w-5 h-5">
+              <FontAwesomeIcon icon={darkMode ? faSun : faMoon} />
+            </div>
             <span className="sr-only">
               {darkMode ? "Toggle Light Mode" : "Toggle Dark Mode"}
             </span>
@@ -669,13 +572,11 @@ function App() {
               } to ${expandedSettings ? "hide" : "show"}`}
             >
               <span>Game Settings</span>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: expandedSettings ? chevronUpHtml : chevronDownHtml
-                }}
-                aria-hidden="true"
-                className="w-6 h-6"
-              />
+              <div aria-hidden="true" className="w-6 h-6">
+                <FontAwesomeIcon
+                  icon={expandedSettings ? faChevronUp : faChevronDown}
+                />
+              </div>
             </button>
           </h3>
 
@@ -728,7 +629,7 @@ function App() {
                   onChange={(e) => {
                     setSettings((prev) => ({
                       ...prev,
-                      pokemonPerRound: parseInt(e.target.value)
+                      pokemonPerRound: parseInt(e.target.value),
                     }));
                     setGameLoading(true);
                   }}
@@ -804,13 +705,11 @@ function App() {
                 } to ${expandedRounds[i] ? "hide" : "show"} POKéMON cards`}
               >
                 <span>Round {i + 1}</span>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: expandedRounds[i] ? chevronUpHtml : chevronDownHtml
-                  }}
-                  aria-hidden="true"
-                  className="w-6 h-6"
-                />
+                <div aria-hidden="true" className="w-6 h-6">
+                  <FontAwesomeIcon
+                    icon={expandedRounds[i] ? faChevronUp : faChevronDown}
+                  />
+                </div>
               </button>
             </h2>
             {expandedRounds[i] && (
