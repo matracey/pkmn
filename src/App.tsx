@@ -19,6 +19,16 @@ interface PokeData {
   revealed: boolean;
 }
 
+interface PokeGeneration {
+    startId: number;
+    endId: number;
+    availableIds: number[];
+    shortGame: string;
+    game: string;
+    maxDex: number;
+    generation: string;
+}
+
 const numeralLookup = [
   "I",
   "II",
@@ -78,22 +88,42 @@ function App() {
   });
   const [allPokemon, setAllPokemon] = useState(new Set());
 
-  const generations = useCallback(
-    () =>
-      settings.includedGenerations.map((genIdx) => {
-        const prev = gameGenerations?.[genIdx - 1];
-        const curr = gameGenerations[genIdx];
-        const [startId, endId] = [(prev?.maxDex ?? 0) + 1, curr.maxDex];
+  /**
+   * A memoized array that processes all game generations.
+   * 
+   * It maps over the `gameGenerations` array and enriches each generation object
+   * with additional properties:
+   * - `generation`: A Roman numeral representation of the generation number.
+   * - `startId`: The starting Pokédex ID for that generation, calculated based on
+   * the maximum Pokédex number of the previous generation.
+   * - `endId`: The ending Pokédex ID for that generation.
+   * - `availableIds`: An array containing all Pokédex numbers within that generation's range.
+   * The function is memoized with `useMemo` and will only be re-created if the
+   * dependencies change (which in this case, they do not).
+   * 
+   * @returns An array of enriched generation objects. Each object contains the original
+   * generation data, a Roman numeral representation of the generation number, the
+   * calculated `startId` and `endId`, and an array `availableIds` containing all
+   * Pokédex numbers within that generation's range.
+   */
+  const availableGenerations = useMemo<PokeGeneration[]>(() => {
+    return gameGenerations.map((gen, index) => ({
+      ...gen,
+      generation: numeralLookup[index],
+      startId: (gameGenerations[index - 1]?.maxDex ?? 0) + 1,
+      endId: gen.maxDex,
+      availableIds: _.range((gameGenerations[index - 1]?.maxDex ?? 0) + 1, gen.maxDex + 1),
+    }));
+  }, []);
 
-        return {
-          generation: numeralLookup[genIdx],
-          ...curr,
-          startId,
-          endId,
-          availableIds: _.range(startId, endId + 1),
-        };
-      }),
-    [settings]
+  /**
+   * A memoized function that filters and returns the selected Pokémon generations
+   * based on the current game settings.
+   */
+  const selectedGenerations = useCallback(
+    () =>
+      availableGenerations.filter((_, index) => settings.includedGenerations.includes(index)),
+    [settings, availableGenerations]
   );
 
   // Listen for system theme changes
@@ -136,7 +166,7 @@ function App() {
   useEffect(() => {
     async function fetchGame() {
       const bannedWordSet = allPokemon;
-      const gens = generations();
+      const gens = selectedGenerations();
       const total = settings.rounds * settings.pokemonPerRound;
       const ids = _(gens).flatMap("availableIds").sampleSize(total).value();
 
@@ -188,7 +218,7 @@ function App() {
     if (!pkmnLoading) {
       fetchGame();
     }
-  }, [P, generations, allPokemon, settings, pkmnLoading]);
+  }, [P, selectedGenerations, allPokemon, settings, pkmnLoading]);
 
   const toggleRound = (index: number) => {
     setExpandedRounds((prev) =>
@@ -334,7 +364,7 @@ function App() {
                     Generations:
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-1 text-xs">
-                    {generations().map((gen, index) => (
+                    {availableGenerations.map((gen, index) => (
                       <label
                         key={index}
                         className="flex items-center cursor-pointer"
@@ -492,7 +522,7 @@ function App() {
           >
             <button
               onClick={() => setExpandedSettings(!expandedSettings)}
-              className="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-md px-2 py-1"
+              className="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:dark:ring-yellow-500 rounded-md px-2 py-1"
               aria-expanded={expandedSettings}
               aria-controls="game-settings-content"
               aria-label={`Game Settings, ${
@@ -567,7 +597,7 @@ function App() {
                   Generations:
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-1 text-xs">
-                  {generations().map((gen, index) => (
+                  {availableGenerations.map((gen, index) => (
                     <label
                       key={index}
                       className="flex items-center cursor-pointer"
@@ -611,7 +641,7 @@ function App() {
             >
               <button
                 onClick={() => toggleRound(i)}
-                className="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-md px-2 py-1"
+                className="flex justify-between items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:dark:ring-yellow-500 rounded-md px-2 py-1"
                 aria-expanded={expandedRounds[i]}
                 aria-controls={`round-${i}-content`}
                 aria-label={`Round ${i + 1}, ${
