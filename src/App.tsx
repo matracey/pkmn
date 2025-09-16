@@ -44,6 +44,18 @@ const gameGenerations = [
   { shortGame: "S & V", game: "Scarlet and Violet", maxDex: 1025 }, // 906-1025
 ];
 
+/**
+ * Determine if the user prefers dark mode based on their system settings.
+ *
+ * @returns true if the user prefers dark mode, false otherwise
+ */
+const getDarkModeStateFromColorScheme = () => {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  return false;
+};
+
 function App() {
   const DEFAULT_ROUNDS = 6;
   const DEFAULT_POKES_PER_ROUND = 3;
@@ -52,13 +64,9 @@ function App() {
   const [data, setData] = useState<PokeData[]>([]);
   const [pkmnLoading, setPkmnLoading] = useState(true);
   const [gameLoading, setGameLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(() => {
-    // Initialize dark mode based on system preference
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches;
-    }
-    return false;
-  });
+
+  const [darkMode, setDarkMode] = useState(getDarkModeStateFromColorScheme);
+
   const [expandedRounds, setExpandedRounds] = useState(
     _.times(DEFAULT_ROUNDS, (i) => i === 0)
   );
@@ -212,29 +220,15 @@ function App() {
     const skeletonRounds = new Array(settings.rounds).fill(null);
 
     return (
-      <div
-        className={`min-h-screen ${
-          darkMode
-            ? "bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800"
-            : "bg-gradient-to-br from-blue-100 via-yellow-50 to-red-100"
-        } py-8 px-4`}
-      >
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-yellow-50 to-red-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 py-8 px-4">
         <main
-          className={`mx-auto w-full max-w-4xl space-y-8 p-6 rounded-2xl shadow-xl border-4 ${
-            darkMode
-              ? "bg-gradient-to-br from-gray-800 to-black border-gray-600"
-              : "bg-gradient-to-br from-yellow-200 to-red-200 border-red-600"
-          }`}
+          className="mx-auto w-full max-w-4xl space-y-8 p-6 rounded-2xl shadow-xl border-4 bg-gradient-to-br from-yellow-200 to-red-200 border-red-600 dark:from-gray-800 dark:to-black dark:border-gray-600"
           role="main"
           aria-label="Who's That POKéMON game"
         >
           {/* Header */}
           <div className="flex justify-between items-center">
-            <h1
-              className={`text-4xl font-extrabold text-center drop-shadow-lg ${
-                darkMode ? "text-yellow-400" : "text-red-700"
-              }`}
-            >
+            <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
               Who's That POKéMON?
             </h1>
             <button
@@ -257,17 +251,11 @@ function App() {
           </div>
 
           {/* Settings Panel */}
-          <div
-            className={`${
-              darkMode
-                ? "bg-gray-700 border-gray-500"
-                : "bg-white border-red-500"
-            } border-2 rounded-xl shadow-lg p-6`}
-          >
+          <div className="bg-white border-red-500 border-2 rounded-xl shadow-lg p-6 dark:bg-gray-700 dark:border-gray-500">
             <h3
               className={`text-xl font-bold ${
                 expandedSettings ? "mb-4" : null
-              } ${darkMode ? "text-yellow-400" : "text-red-700"}`}
+              } text-red-700 dark:text-yellow-400`}
             >
               <button
                 onClick={() => setExpandedSettings(!expandedSettings)}
@@ -293,9 +281,7 @@ function App() {
                 <div>
                   <label
                     htmlFor="rounds-slider"
-                    className={`block text-sm font-medium mb-2 ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
+                    className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
                   >
                     Rounds: {settings.rounds}
                   </label>
@@ -313,7 +299,7 @@ function App() {
                       );
                       setGameLoading(true);
                     }}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 accent-red-500 dark:accent-yellow-400"
                   />
                 </div>
 
@@ -321,9 +307,7 @@ function App() {
                 <div>
                   <label
                     htmlFor="pokemon-slider"
-                    className={`block text-sm font-medium mb-2 ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
+                    className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
                   >
                     POKéMON per Round: {settings.pokemonPerRound}
                   </label>
@@ -340,17 +324,13 @@ function App() {
                       }));
                       setGameLoading(true);
                     }}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 accent-red-500 dark:accent-yellow-400"
                   />
                 </div>
 
                 {/* Generation Selector */}
                 <div className="col-span-full">
-                  <label
-                    className={`block text-sm font-medium mb-2 ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
+                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     Generations:
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-1 text-xs">
@@ -374,9 +354,7 @@ function App() {
                           }
                         />
                         <span
-                          className={`truncate mx-1 ${
-                            darkMode ? "text-gray-300" : "text-gray-600"
-                          }`}
+                          className="truncate mx-1 text-gray-600 dark:text-gray-300"
                           title={gen.game}
                         >
                           {gen.generation} ({gen.shortGame})
@@ -393,16 +371,12 @@ function App() {
           {skeletonRounds.map((_, i) => (
             <div
               key={i}
-              className={`bg-opacity-90 border-2 rounded-xl shadow-2xl p-6 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-500"
-                  : "bg-white border-red-500"
-              }`}
+              className="bg-opacity-90 border-2 rounded-xl shadow-2xl p-6 bg-white border-red-500 dark:bg-gray-700 dark:border-gray-500"
             >
               <h2
                 className={`text-2xl font-bold cursor-pointer flex justify-between items-center ${
                   expandedRounds[i] ? "mb-4" : null
-                } ${darkMode ? "text-yellow-400" : "text-red-600"}`}
+                } text-red-600 dark:text-yellow-400`}
               >
                 <button
                   onClick={() => toggleRound(i)}
@@ -434,38 +408,26 @@ function App() {
                     .map((_, idx) => (
                       <div
                         key={idx}
-                        className={`relative overflow-hidden border-2 rounded-xl ${
-                          darkMode ? "border-gray-500" : "border-red-500"
-                        }`}
+                        className={`relative overflow-hidden border-2 rounded-xl border-red-500 dark:border-gray-500`}
                         role="article"
                         aria-label={`Loading POKéMON ${idx + 1} in round ${
                           i + 1
                         }`}
                       >
                         <div
-                          className={`absolute inset-0 bg-gradient-to-b opacity-20 pointer-events-none ${
-                            darkMode
-                              ? "from-gray-500 to-black"
-                              : "from-red-500 to-white"
-                          }`}
+                          className="absolute inset-0 bg-gradient-to-b opacity-20 pointer-events-none from-red-500 to-white dark:from-gray-500 dark:to-black"
                           aria-hidden="true"
                         ></div>
                         <div className="relative p-4 flex flex-col justify-between h-full min-h-[250px]">
                           <div className="mb-4 flex-1">
                             {/* Skeleton Title */}
-                            <div
-                              className={`h-6 w-24 rounded mb-4 animate-pulse ${
-                                darkMode ? "bg-gray-600" : "bg-gray-300"
-                              }`}
-                            ></div>
+                            <div className="h-6 w-24 rounded mb-4 animate-pulse bg-gray-300 dark:bg-gray-600"></div>
 
                             {/* Skeleton Image with spinner */}
                             <div className="flex justify-center items-center h-24 mb-4">
                               <div
                                 aria-hidden="true"
-                                className={`w-8 h-8 ${
-                                  darkMode ? "text-yellow-500" : "text-red-500"
-                                }`}
+                                className="w-8 h-8 text-red-500 dark:text-yellow-500"
                               >
                                 <FontAwesomeIcon icon={faSpinner} />
                               </div>
@@ -473,30 +435,14 @@ function App() {
 
                             {/* Skeleton Text */}
                             <div className="space-y-2">
-                              <div
-                                className={`h-4 rounded animate-pulse ${
-                                  darkMode ? "bg-gray-600" : "bg-gray-300"
-                                }`}
-                              ></div>
-                              <div
-                                className={`h-4 w-3/4 rounded animate-pulse ${
-                                  darkMode ? "bg-gray-600" : "bg-gray-300"
-                                }`}
-                              ></div>
-                              <div
-                                className={`h-4 w-1/2 rounded animate-pulse ${
-                                  darkMode ? "bg-gray-600" : "bg-gray-300"
-                                }`}
-                              ></div>
+                              <div className="h-4 rounded animate-pulse bg-gray-300 dark:bg-gray-600"></div>
+                              <div className="h-4 w-3/4 rounded animate-pulse bg-gray-300 dark:bg-gray-600"></div>
+                              <div className="h-4 w-1/2 rounded animate-pulse bg-gray-300 dark:bg-gray-600"></div>
                             </div>
                           </div>
 
                           {/* Skeleton Button */}
-                          <div
-                            className={`self-center h-10 w-32 rounded-full animate-pulse ${
-                              darkMode ? "bg-gray-600" : "bg-gray-300"
-                            }`}
-                          ></div>
+                          <div className="self-center h-10 w-32 rounded-full animate-pulse bg-gray-300 dark:bg-gray-600"></div>
                         </div>
                       </div>
                     ))}
@@ -512,28 +458,14 @@ function App() {
   const rounds = _.chunk(data, settings.pokemonPerRound);
 
   return (
-    <div
-      className={`min-h-screen ${
-        darkMode
-          ? "bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800"
-          : "bg-gradient-to-br from-blue-100 via-yellow-50 to-red-100"
-      } py-8 px-4`}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-yellow-50 to-red-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 py-8 px-4">
       <main
-        className={`mx-auto w-full max-w-4xl space-y-8 p-6 rounded-2xl shadow-xl border-4 ${
-          darkMode
-            ? "bg-gradient-to-br from-gray-800 to-black border-gray-600"
-            : "bg-gradient-to-br from-yellow-200 to-red-200 border-red-600"
-        }`}
+        className="mx-auto w-full max-w-4xl space-y-8 p-6 rounded-2xl shadow-xl border-4 bg-gradient-to-br from-yellow-200 to-red-200 border-red-600 dark:from-gray-800 dark:to-black dark:border-gray-600"
         role="main"
         aria-label="Who's That POKéMON game"
       >
         <div className="flex justify-between items-center">
-          <h1
-            className={`text-4xl font-extrabold text-center drop-shadow-lg ${
-              darkMode ? "text-yellow-400" : "text-red-700"
-            }`}
-          >
+          <h1 className="text-4xl font-extrabold text-center drop-shadow-lg text-red-700 dark:text-yellow-400">
             Who's That POKéMON?
           </h1>
           <button
@@ -552,15 +484,11 @@ function App() {
         </div>
 
         {/* Settings Panel */}
-        <div
-          className={`${
-            darkMode ? "bg-gray-700 border-gray-500" : "bg-white border-red-500"
-          } border-2 rounded-xl shadow-lg p-6`}
-        >
+        <div className="bg-white border-red-500 border-2 rounded-xl shadow-lg p-6 dark:bg-gray-700 dark:border-gray-500">
           <h3
-            className={`text-xl font-bold ${expandedSettings ? "mb-4" : null} ${
-              darkMode ? "text-yellow-400" : "text-red-700"
-            }`}
+            className={`text-xl font-bold ${
+              expandedSettings ? "mb-4" : null
+            } text-red-700 dark:text-yellow-400`}
           >
             <button
               onClick={() => setExpandedSettings(!expandedSettings)}
@@ -586,9 +514,7 @@ function App() {
               <div>
                 <label
                   htmlFor="rounds-slider"
-                  className={`block text-sm font-medium mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
+                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
                 >
                   Rounds: {settings.rounds}
                 </label>
@@ -606,7 +532,7 @@ function App() {
                     );
                     setGameLoading(true);
                   }}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 accent-red-500 dark:accent-yellow-400"
                 />
               </div>
 
@@ -614,9 +540,7 @@ function App() {
               <div>
                 <label
                   htmlFor="pokemon-slider"
-                  className={`block text-sm font-medium mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
+                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
                 >
                   POKéMON per Round: {settings.pokemonPerRound}
                 </label>
@@ -633,17 +557,13 @@ function App() {
                     }));
                     setGameLoading(true);
                   }}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 accent-red-500 dark:accent-yellow-400"
                 />
               </div>
 
               {/* Generation Selector */}
               <div className="col-span-full">
-                <label
-                  className={`block text-sm font-medium mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                   Generations:
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-1 text-xs">
@@ -667,9 +587,7 @@ function App() {
                         }
                       />
                       <span
-                        className={`truncate mx-1 ${
-                          darkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
+                        className="truncate mx-1 text-gray-600 dark:text-gray-300"
                         title={gen.game}
                       >
                         {gen.generation} ({gen.shortGame})
@@ -684,16 +602,12 @@ function App() {
         {rounds.map((group, i) => (
           <div
             key={i}
-            className={`bg-opacity-90 border-2 rounded-xl shadow-2xl p-6 ${
-              darkMode
-                ? "bg-gray-700 border-gray-500"
-                : "bg-white border-red-500"
-            }`}
+            className="bg-opacity-90 border-2 rounded-xl shadow-2xl p-6 bg-white border-red-500 dark:bg-gray-700 dark:border-gray-500"
           >
             <h2
               className={`text-2xl font-bold cursor-pointer flex justify-between items-center ${
                 expandedRounds[i] ? "mb-4" : null
-              } ${darkMode ? "text-yellow-400" : "text-red-600"}`}
+              } text-red-600 dark:text-yellow-400`}
             >
               <button
                 onClick={() => toggleRound(i)}
@@ -722,29 +636,19 @@ function App() {
                 {group.map((p, idx) => (
                   <div
                     key={p.id}
-                    className={`relative overflow-hidden border-2 rounded-xl group hover:shadow-2xl ${
-                      darkMode ? "border-gray-500" : "border-red-500"
-                    }`}
+                    className="relative overflow-hidden border-2 rounded-xl group hover:shadow-2xl border-red-500 dark:border-gray-500"
                     role="article"
                     aria-label={`POKéMON ${idx + 1} in round ${i + 1}${
                       p.revealed ? `: ${p.name}` : ", mystery POKéMON"
                     }`}
                   >
                     <div
-                      className={`absolute inset-0 bg-gradient-to-b opacity-20 pointer-events-none ${
-                        darkMode
-                          ? "from-gray-500 to-black"
-                          : "from-red-500 to-white"
-                      }`}
+                      className="absolute inset-0 bg-gradient-to-b opacity-20 pointer-events-none from-red-500 to-white dark:from-gray-500 dark:to-black"
                       aria-hidden="true"
                     ></div>
                     <div className="relative p-4 flex flex-col justify-between h-full min-h-[250px]">
                       <div className="mb-4 flex-1">
-                        <p
-                          className={`text-lg font-bold uppercase ${
-                            darkMode ? "text-yellow-400" : "text-red-700"
-                          }`}
-                        >
+                        <p className="text-lg font-bold uppercase text-red-700 dark:text-yellow-400">
                           {idx + 1}.{" "}
                           {p.revealed ? `${p.name} (#${p.id})` : "???"}
                         </p>
@@ -766,9 +670,7 @@ function App() {
                         )}
                         <p
                           id={`pokemon-${p.id}-hint`}
-                          className={`mt-2 ${
-                            darkMode ? "text-gray-300" : "text-gray-800"
-                          }`}
+                          className="mt-2 text-gray-800 dark:text-gray-300"
                           aria-label={
                             p.revealed
                               ? `Description: ${p.flavor}`
@@ -790,11 +692,7 @@ function App() {
                               setData(updatedData);
                             }
                           }}
-                          className={`self-center ${
-                            darkMode
-                              ? "bg-yellow-600 hover:bg-yellow-700 focus:bg-yellow-700 focus:ring-yellow-400"
-                              : "bg-red-600 hover:bg-red-700 focus:bg-red-700 focus:ring-red-400"
-                          } text-white font-semibold px-4 py-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                          className={`self-center bg-red-600 hover:bg-red-700 focus:bg-red-700 focus:ring-red-400 text-white font-semibold px-4 py-2 rounded-full transition focus:outline-none focus:ring-2 focus:ring-offset-2 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:bg-yellow-700 dark:focus:ring-yellow-400`}
                           aria-label={`Reveal answer for POKéMON ${
                             idx + 1
                           } in round ${i + 1}`}
