@@ -185,41 +185,55 @@ function App() {
         })
       );
 
-      const cleaned = pokemonData.map<PokeData>((s) => {
-        // split flavor text into words and replace banned words
-        const flavorTextEntry = _.find(s.flavor_text_entries, {
-          language: { name: "en" },
-        });
+      const cleaned = await Promise.all(
+        pokemonData.map<Promise<PokeData>>(async (s) => {
+          // split flavor text into words and replace banned words
+          const flavorTextEntry = _.find(s.flavor_text_entries, {
+            language: { name: "en" },
+          });
 
-        const flavor = _.split(
-          _.get(flavorTextEntry, "flavor_text", ""),
-          /(?=\W+)/g
-        )
-          .map((c) => {
-            const clean = c.replace(/\W+/g, "").toLowerCase();
-            if (bannedWordSet.has(clean)) {
-              return c.toLowerCase().replace(clean, _.repeat("_", 4));
-            }
-            return c;
-          })
-          .join("")
-          .replace(/[\s\n]/g, " ");
+          const flavor = _.split(
+            _.get(flavorTextEntry, "flavor_text", ""),
+            /(?=\W+)/g
+          )
+            .map((c) => {
+              const clean = c.replace(/\W+/g, "").toLowerCase();
+              if (bannedWordSet.has(clean)) {
+                return c.toLowerCase().replace(clean, _.repeat("_", 4));
+              }
+              return c;
+            })
+            .join("")
+            .replace(/[\s\n]/g, " ");
 
-        // Extract ability names from the Pokemon data
-        const abilities = (s.abilities || []).map(
-          (a: { ability: { name: string } }) =>
-            a.ability.name.replace(/-/g, " ")
-        );
+          // Fetch ability details from the API to get English names
+          const abilityNames = await Promise.all(
+            (s.abilities || []).map(
+              async (a: { ability: { name: string } }) => {
+                try {
+                  const abilityData = await P.getAbilityByName(a.ability.name);
+                  const englishName = _.find(abilityData.names, {
+                    language: { name: "en" },
+                  });
+                  return englishName?.name ?? a.ability.name;
+                } catch {
+                  // Fallback to the ability name if API call fails
+                  return a.ability.name;
+                }
+              }
+            )
+          );
 
-        return {
-          id: s.id,
-          name: s.name,
-          flavor: flavor,
-          sprite: s.sprites.front_default ?? undefined,
-          revealed: false,
-          abilities: abilities,
-        };
-      });
+          return {
+            id: s.id,
+            name: s.name,
+            flavor: flavor,
+            sprite: s.sprites.front_default ?? undefined,
+            revealed: false,
+            abilities: abilityNames,
+          };
+        })
+      );
       setData(cleaned);
       setGameLoading(false);
     }
