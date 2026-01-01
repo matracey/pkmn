@@ -17,6 +17,7 @@ interface PokeData {
   flavor: string;
   sprite?: string;
   revealed: boolean;
+  abilities: string[];
 }
 
 interface PokeGeneration {
@@ -204,12 +205,19 @@ function App() {
           .join("")
           .replace(/[\s\n]/g, " ");
 
+        // Extract ability names from the Pokemon data
+        const abilities = (s.abilities || []).map(
+          (a: { ability: { name: string } }) =>
+            a.ability.name.replace(/-/g, " ")
+        );
+
         return {
           id: s.id,
           name: s.name,
           flavor: flavor,
           sprite: s.sprites.front_default ?? undefined,
           revealed: false,
+          abilities: abilities,
         };
       });
       setData(cleaned);
@@ -704,6 +712,12 @@ function App() {
                             aria-describedby={`pokemon-${p.id}-hint`}
                           />
                         )}
+                        <p
+                          className="mt-2 text-sm font-semibold text-blue-600 dark:text-purple-400 capitalize"
+                        >
+                          <span className="font-bold">Abilities:</span>{" "}
+                          {p.abilities.join(", ")}
+                        </p>
                         <p
                           id={`pokemon-${p.id}-hint`}
                           className="mt-2 text-gray-800 dark:text-gray-300"
