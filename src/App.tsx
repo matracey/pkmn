@@ -172,9 +172,11 @@ function App() {
   useEffect(() => {
     async function fetchAllAbilities() {
       const fetched = await P.getAbilitiesList({ offset: 0, limit: 1000 });
-      setAllAbilityNames(
-        fetched.results.map((a: { name: string }) => _.startCase(a.name))
-      );
+      const mainSeries = fetched.results.filter((a: { url: string }) => {
+        const id = parseInt(a.url.match(/\/ability\/(\d+)\/?$/)?.[1] ?? "0", 10);
+        return id > 0 && id < 10000;
+      });
+      setAllAbilityNames(mainSeries.map((a: { name: string }) => _.startCase(a.name)));
     }
     fetchAllAbilities();
   }, [P]);
