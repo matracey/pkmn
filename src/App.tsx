@@ -129,7 +129,7 @@ function App() {
   const selectedGenerations = useCallback(
     () =>
       availableGenerations.filter((_, index) => settings.includedGenerations.includes(index)),
-    [settings, availableGenerations]
+    [settings.includedGenerations, availableGenerations]
   );
 
   // Listen for system theme changes
