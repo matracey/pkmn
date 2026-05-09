@@ -88,6 +88,7 @@ function App() {
     includedGenerations: [0, 1, 2, 3, 4, 5, 6, 7, 8], // All generations by default
     alwaysRevealed: false,
     showDescriptions: true,
+    showRandomAbility: false,
   });
   const [allPokemon, setAllPokemon] = useState(new Set());
 
