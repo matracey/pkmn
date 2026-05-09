@@ -18,6 +18,7 @@ interface PokeData {
   sprite?: string;
   revealed: boolean;
   abilities: string[];
+  randomAbility?: string;
 }
 
 interface PokeGeneration {
