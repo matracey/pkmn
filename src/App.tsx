@@ -443,6 +443,22 @@ function App() {
                         Always Revealed
                       </span>
                     </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.showDescriptions}
+                        onChange={(e) =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            showDescriptions: e.target.checked,
+                          }))
+                        }
+                        className="mr-1"
+                      />
+                      <span className="mx-1 text-gray-600 dark:text-gray-300">
+                        Show Descriptions
+                      </span>
+                    </label>
                   </div>
                 </div>
               </div>
