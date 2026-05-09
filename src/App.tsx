@@ -460,6 +460,22 @@ function App() {
                         Show Descriptions
                       </span>
                     </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.showRandomAbility}
+                        onChange={(e) =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            showRandomAbility: e.target.checked,
+                          }))
+                        }
+                        className="mr-1"
+                      />
+                      <span className="mx-1 text-gray-600 dark:text-gray-300">
+                        Show Random Ability
+                      </span>
+                    </label>
                   </div>
                 </div>
               </div>
