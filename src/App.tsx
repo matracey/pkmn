@@ -419,6 +419,31 @@ function App() {
                     ))}
                   </div>
                 </div>
+
+                {/* Display Options */}
+                <div className="col-span-full">
+                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    Display Options:
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.alwaysRevealed}
+                        onChange={(e) =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            alwaysRevealed: e.target.checked,
+                          }))
+                        }
+                        className="mr-1"
+                      />
+                      <span className="mx-1 text-gray-600 dark:text-gray-300">
+                        Always Revealed
+                      </span>
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
           </div>
