@@ -267,7 +267,15 @@ function App() {
     if (!pkmnLoading && allAbilityNames.length > 0) {
       fetchGame();
     }
-  }, [P, selectedGenerations, allPokemon, allAbilityNames, settings, pkmnLoading]);
+  }, [
+    P,
+    selectedGenerations,
+    allPokemon,
+    allAbilityNames,
+    settings.rounds,
+    settings.pokemonPerRound,
+    pkmnLoading,
+  ]);
 
   const toggleRound = (index: number) => {
     setExpandedRounds((prev) =>
