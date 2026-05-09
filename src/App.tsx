@@ -717,13 +717,15 @@ function App() {
                 role="region"
                 aria-label={`Round ${i + 1} POKéMON cards`}
               >
-                {group.map((p, idx) => (
+                {group.map((p, idx) => {
+                  const isRevealed = p.revealed || settings.alwaysRevealed;
+                  return (
                   <div
                     key={p.id}
                     className="relative overflow-hidden border-2 rounded-xl group hover:shadow-2xl border-red-500 dark:border-gray-500"
                     role="article"
                     aria-label={`POKéMON ${idx + 1} in round ${i + 1}${
-                      p.revealed ? `: ${p.name}` : ", mystery POKéMON"
+                      isRevealed ? `: ${p.name}` : ", mystery POKéMON"
                     }`}
                   >
                     <div
@@ -734,9 +736,9 @@ function App() {
                       <div className="mb-4 flex-1">
                         <p className="text-lg font-bold uppercase text-red-700 dark:text-yellow-400">
                           {idx + 1}.{" "}
-                          {p.revealed ? `${p.name} (#${p.id})` : "???"}
+                          {isRevealed ? `${p.name} (#${p.id})` : "???"}
                         </p>
-                        {p.revealed ? (
+                        {isRevealed ? (
                           <img
                             src={p.sprite}
                             alt={`${p.name} sprite`}
@@ -762,7 +764,7 @@ function App() {
                           id={`pokemon-${p.id}-hint`}
                           className="mt-2 text-gray-800 dark:text-gray-300"
                           aria-label={
-                            p.revealed
+                            isRevealed
                               ? `Description: ${p.flavor}`
                               : `Hint: ${p.flavor}`
                           }
@@ -770,7 +772,7 @@ function App() {
                           {p.flavor}
                         </p>
                       </div>
-                      {!p.revealed && (
+                      {!isRevealed && (
                         <button
                           onClick={() => {
                             const updatedData = [...data];
@@ -793,7 +795,8 @@ function App() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
