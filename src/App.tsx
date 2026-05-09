@@ -86,6 +86,7 @@ function App() {
     rounds: DEFAULT_ROUNDS,
     pokemonPerRound: DEFAULT_POKES_PER_ROUND,
     includedGenerations: [0, 1, 2, 3, 4, 5, 6, 7, 8], // All generations by default
+    alwaysRevealed: false,
   });
   const [allPokemon, setAllPokemon] = useState(new Set());
 
