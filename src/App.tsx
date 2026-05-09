@@ -239,12 +239,16 @@ function App() {
             )
           );
 
-          // Pick a random ability from the master list to display
-          // alongside this Pokémon's native abilities.
+          // Pick a random ability that isn't already one of this Pokémon's
+          // native abilities so the fake ability stands out.
+          const ownedAbilitiesLower = new Set(
+            abilityNames.map((n) => n.toLowerCase())
+          );
+          const candidatePool = allAbilityNames.filter(
+            (name) => !ownedAbilitiesLower.has(name.toLowerCase())
+          );
           const randomAbility =
-            allAbilityNames.length > 0
-              ? _.sample(allAbilityNames)
-              : undefined;
+            candidatePool.length > 0 ? _.sample(candidatePool) : undefined;
 
           return {
             id: s.id,
