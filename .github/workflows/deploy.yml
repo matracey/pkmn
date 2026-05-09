@@ -40,6 +40,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.tmp
+          key: ${{ runner.os }}-tsbuildinfo-${{ hashFiles('tsconfig*.json', 'src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-tsbuildinfo-
+
       - name: Build
         run: npm run build
 
