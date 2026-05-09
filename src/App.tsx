@@ -92,6 +92,7 @@ function App() {
     showRandomAbility: false,
   });
   const [allPokemon, setAllPokemon] = useState(new Set());
+  const [allAbilityNames, setAllAbilityNames] = useState<string[]>([]);
 
   /**
    * A memoized array that processes all game generations.
@@ -169,6 +170,16 @@ function App() {
   }, [P]);
 
   useEffect(() => {
+    async function fetchAllAbilities() {
+      const fetched = await P.getAbilitiesList({ offset: 0, limit: 1000 });
+      setAllAbilityNames(
+        fetched.results.map((a: { name: string }) => _.startCase(a.name))
+      );
+    }
+    fetchAllAbilities();
+  }, [P]);
+
+  useEffect(() => {
     async function fetchGame() {
       const bannedWordSet = allPokemon;
       const gens = selectedGenerations();
@@ -228,6 +239,13 @@ function App() {
             )
           );
 
+          // Pick a random ability from the master list to display
+          // alongside this Pokémon's native abilities.
+          const randomAbility =
+            allAbilityNames.length > 0
+              ? _.sample(allAbilityNames)
+              : undefined;
+
           return {
             id: s.id,
             name: s.name,
@@ -235,16 +253,17 @@ function App() {
             sprite: s.sprites.front_default ?? undefined,
             revealed: false,
             abilities: abilityNames,
+            randomAbility,
           };
         })
       );
       setData(cleaned);
       setGameLoading(false);
     }
-    if (!pkmnLoading) {
+    if (!pkmnLoading && allAbilityNames.length > 0) {
       fetchGame();
     }
-  }, [P, selectedGenerations, allPokemon, settings, pkmnLoading]);
+  }, [P, selectedGenerations, allPokemon, allAbilityNames, settings, pkmnLoading]);
 
   const toggleRound = (index: number) => {
     setExpandedRounds((prev) =>
