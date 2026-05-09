@@ -777,17 +777,19 @@ function App() {
                           <span className="font-bold">Abilities:</span>{" "}
                           {p.abilities.join(", ")}
                         </p>
-                        <p
-                          id={`pokemon-${p.id}-hint`}
-                          className="mt-2 text-gray-800 dark:text-gray-300"
-                          aria-label={
-                            isRevealed
-                              ? `Description: ${p.flavor}`
-                              : `Hint: ${p.flavor}`
-                          }
-                        >
-                          {p.flavor}
-                        </p>
+                        {settings.showDescriptions && (
+                          <p
+                            id={`pokemon-${p.id}-hint`}
+                            className="mt-2 text-gray-800 dark:text-gray-300"
+                            aria-label={
+                              isRevealed
+                                ? `Description: ${p.flavor}`
+                                : `Hint: ${p.flavor}`
+                            }
+                          >
+                            {p.flavor}
+                          </p>
+                        )}
                       </div>
                       {!isRevealed && (
                         <button
