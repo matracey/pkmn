@@ -816,7 +816,20 @@ function App() {
                           className="mt-2 text-sm font-semibold text-blue-600 dark:text-purple-400 capitalize"
                         >
                           <span className="font-bold">Abilities:</span>{" "}
-                          {p.abilities.join(", ")}
+                          {p.abilities.map((ability, abilityIdx) => (
+                            <span key={`real-${abilityIdx}`}>
+                              {abilityIdx > 0 && ", "}
+                              {ability}
+                            </span>
+                          ))}
+                          {settings.showRandomAbility && p.randomAbility && (
+                            <>
+                              {p.abilities.length > 0 && ", "}
+                              <span className="italic text-pink-600 dark:text-pink-400 underline decoration-dotted">
+                                {p.randomAbility}
+                              </span>
+                            </>
+                          )}
                         </p>
                         {settings.showDescriptions && (
                           <p
